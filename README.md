@@ -1,128 +1,131 @@
-# URL Home - API de Encurtamento de URLs
+# URL Shortener API
 
-Uma API REST para criação e gerenciamento de URLs encurtadas.
+API para encurtamento de URLs desenvolvida com Django.
 
-Este projeto foi desenvolvido como parte de um desafio técnico backend e demonstra boas práticas de arquitetura, validação de URLs, rastreamento de acessos e testes automatizados.
+O projeto permite:
 
-# Funcionalidades
+- Criar URLs encurtadas
+- Redirecionar para a URL original
+- Consultar informações da URL
+- Contabilizar número de cliques
+- Definir expiração
+- Utilizar alias customizado
 
-Criar URLs encurtadas
-Redirecionar para a URL original
-Consultar detalhes de uma URL
-Suporte para alias customizado
-Expiração de URLs
-Contagem de acessos click tracking
-Autenticação básica
-Testes automatizados com pytest
+# Tecnologias utilizadas
 
-# Tecnologias Utilizadas
+- Python 3.12
+- Django 6
+- Pytest
+- Docker
 
-Python
-Django
-Django REST Framework
-SQLite
-pytest
-Docker
+# Arquitetura
 
-# 📦 Estrutura do Projeto
+O projeto foi organizado em camadas para manter separação de responsabilidades.
 url_home/
-urls/
-controllers/
-services/
-repositories/
-models.py
-views.py
-tests/
-manage.py
-requirements.txt
-Dockerfile
-README.md
+views.py → camada HTTP
+services.py → regras de negócio
+repository.py → acesso ao banco de dados
+validators.py → validações
+utils.py → utilidades
+auth.py → autenticação via API Key
 
-O projeto segue uma arquitetura em camadas:
-Controller responsável por receber e responder requisições HTTP
-Service contém as regras de negócio
-Repository responsável pelo acesso ao banco de dados
+# Instalação do projeto
+Clone o repositório:
+git clone https://github.com/lcsjoliveira/url-home-api.git
+cd url-home-api
 
-Essa separação melhora a organização, manutenção e testabilidade do código.
+Crie o ambiente virtual:
+python -m venv venv
 
-# Endpoints da API
+Ative o ambiente:
+Windows
+venv\Scripts\activate
+Linux / Mac
+source venv/bin/activate
 
-## Criar URL Encurtada
-POST /v1/urls
-Exemplo de requisição:
-
-{
-  "url": "https://example.com",
-  "customAlias": "meu-link",
-  "expiresAt": "2026-12-31T23:59:59Z"
-}
-
-Exemplo de resposta:
-{
-  "id": "meu-link",
-  "shortUrl": "http://localhost:8000/meu-link"
-}
-
-## Redirecionar para a URL Original
-GET /{shortId}
-Exemplo:
-GET /abc123
-
-Redireciona automaticamente para a URL original.
-
-## Consultar Detalhes da URL
-GET /v1/urls/{id}
-Exemplo de resposta:
-{
-  "id": "abc123",
-  "originalUrl": "https://example.com",
-  "clickCount": 10,
-  "createdAt": "2026-01-01T10:00:00Z"
-}
-
-# ▶ Como Executar o Projeto Localmente
-
-## 1 Instalar dependências
+Instale as dependências:
 pip install -r requirements.txt
 
-## 2 Executar as migrations
+Execute as migrations:
 python manage.py migrate
 
-## 3 Iniciar o servidor
+Inicie o servidor:
 python manage.py runserver
 
-A API estará disponível em:
-http://localhost:8000
+# Autenticação
+A API utiliza autenticação simples por API Key.
 
+Header necessário:
+X-API-KEY: test-api-key
 
-# Executando os Testes
-Os testes foram implementados utilizando pytest.
+# Endpoints da API
+## Criar URL encurtada
+POST
+/v1/urls
 
-Para executar:
+Body:
+{
+"originalUrl": "https://google.com"
+}
+
+Exemplo usando curl:
+curl -X POST http://localhost:8000/v1/urls
+-H "Content-Type: application/json"
+-H "X-API-KEY: test-api-key"
+-d '{
+"originalUrl": "https://google.com"
+}'
+
+Resposta esperada:
+{
+"id": "abc123",
+"shortUrl": "http://localhost:8000/abc123",
+"originalUrl": "https://google.com"
+}
+
+## Redirecionar URL
+GET
+/{id}
+
+Exemplo:
+http://localhost:8000/abc123
+
+## Consultar detalhes da URL
+GET
+/v1/urls/{id}
+
+Resposta:
+{
+"id": "abc123",
+"shortUrl": "http://localhost:8000/abc123",
+"originalUrl": "https://google.com",
+"createdAt": "...",
+"expirationDate": null,
+"clickCount": 5
+}
+
+# Rodando os testes
+Execute:
 pytest
 
+O projeto possui:
+- testes unitários
+- testes de integração
+
 # Executando com Docker
-## Construir a imagem
-docker build -t url-home-api .
+Build da imagem:
+docker build -t url-shortener .
 
-## Executar o container
-docker run -p 8000:8000 url-home-api
+Rodar container:
+docker run -p 8000:8000 url-shortener
 
-A aplicação ficará disponível em:
-http://localhost:8000
-
-# Autenticação
-Alguns endpoints exigem autenticação básica.
-Exemplo de header:
-Authorization: Basic base64(usuario:senha)
-
-# 📈 Possíveis Melhorias Futuras
-Algumas melhorias que poderiam ser adicionadas em um ambiente de produção:
-
-Endpoint para listagem de URLs
-Paginação
-Cache com Redis
-Configuração de deploy para produção
+# Decisões técnicas
+Algumas decisões adotadas no projeto:
+- Uso de Django para acelerar o desenvolvimento da API
+- Separação em camadas service, repository para melhorar manutenção
+- Pytest para facilitar testes automatizados
+- API Key simples para autenticação da API
+- Docker para facilitar execução em qualquer ambiente
 
 # Autor
-Projeto desenvolvido como parte de um desafio técnico para avaliação de habilidades em backend.
+Lucas Oliveira
